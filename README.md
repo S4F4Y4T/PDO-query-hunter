@@ -1,4 +1,4 @@
-<h1 align="center" id="title">PDO-Query-hunter</h1>
+<h1 align="center" id="title">pdoQueryHunter</h1>
 
 <p id="description">This is a secure and robust PHP query builder that uses PDO to interact with the database. The query builder is designed to prevent SQL injection attacks and ensure that all user input is properly sanitized and validated. An easy-to-use interface that can be customized to suit your specific needs. Whether you're building a small application or a large-scale enterprise system this query builder provides the flexibility and scalability you need to manage your database queries efficiently. With its reliable performance and user-friendly interface this PHP query builder is the perfect tool for anyone who wants to build powerful and efficient applications using PDO. 
 
@@ -26,6 +26,17 @@ git clone https://github.com/S4F4Y4T/PDO-query-hunter.git
 
 <p>2. Open config.php and update database information</p>
 
+<h2>Documentation</h2>
+
+<h3>Fetch Data</h4>
+
+<h5>$this->db->execute()</h6>
+
+<p>Call this function to retrive all the records from a table</p>
+
+```
+$this->db->execute('table') //produce select * from table
+```
 
 <h2>License:</h2>
 
