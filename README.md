@@ -54,7 +54,7 @@ Upcoming feature and function still about to come:
 <p>1. Clone The Repository</p>
 
 ```
-git clone https://github.com/S4F4Y4T/PDO-query-hunter.git
+git clone https://github.com/S4F4Y4T/pdoQueryHunter
 ```
 
 <p>2. Open config.php and update database information</p>
