@@ -32,19 +32,238 @@ git clone https://github.com/S4F4Y4T/PDO-query-hunter.git
 
 <h5>$this->db->execute()</h6>
 
-<p>Call this function to retrive all the records from a table</p>
+<p>Call this function to retrive all the records from table</p>
 
 ```
-$this->db->execute('table') 
+$data = $this->db->execute('table');
 
 //output: select * from table
+```
+
+<p>The first parameter accept the table name and second parameter enable you to set limit. Here is an example:</p>
+
+```
+$data = $this->db->execute('table', 20); 
+$data = $this->db->execute('table', 10, 20);
+
+//output: SELECT * FROM table LIMIT 20
+//output: SELECT * FROM table LIMIT 10,20
+```
+
+<p>Go to <a href="#query-result">Query Result</a> to see how to use this query to show result</p>
+
+<h5>$this->db->buildFetchQuery()</h6>
+
+<p>Generate the select query like $this->db->execute() but does not run the query but return the query as string:</p>
+
+```
+$data = $this->db->buildFetchQuery('table', 20); 
+
+//output string: select * from table LIMIT 20
+```
+
+<h5>$this->db->select()</h6>
+
+<p>Call this function which enable you to use the select column of query. Here is an example:</p>
+
+```
+$this->db->select('id,name'); 
+$data = $this->db->execute('table'); 
+
+//output: select id,name from table
+```
+<p>By default all (*) column is selecting</p>
+
+<h5>$this->db->table()</h6>
+
+<p>Let you select the table you want to fetch records from. Here is an example:</p>
+
+```
+$this->db->select('id,name'); 
+$this->db->table('table2');
+$data = $this->db->execute(); 
+
+//output: select id,name from table2
+```
+<p>You can select the table on $this->db->table() or $this->db->execute(), you can use method whichever you prefer</p>
+
+<h5>$this->db->join()</h6>
+
+<p>Let you join table. Here is an example:</p>
+
+```
+$this->db->select('id,name'); 
+$this->db->table('table');
+$this->db->join('table2', 'table2.id = table.table2_id');
+$data = $this->db->execute('table'); 
+
+//output: SELECT id, name FROM table, table INNER JOIN table2 ON table2.id = table.table2_id
+```
+<p>You can call this function multiple time if you need to join multiple table</p>
+
+<p>If you need specific type of join you can define it on third parameter, Options are: inner, outer, left, right, cross</p>
+
+```
+$this->db->select('id,name'); 
+$this->db->table('table');
+$this->db->join('table2', 'table2.id = table.table2_id', 'left');
+$data = $this->db->execute('table'); 
+
+output: SELECT id, name FROM table, table LEFT JOIN table2 ON table2.id = table.table2_id
+```
+
+<h2>Specific Data</h2>
+
+<h5>$this->db->where()</h6>
+
+<p>This function enables you to set WHERE clauses using one of these methods::</p>
+
+<h5>1. Key and value method</h6>
+
+```
+$this->db->where('id', 1); 
+
+//output: WHERE id = :id
+```
+
+<p>If you use multiple function calls they will be chained together with AND between them:</p>
+
+```
+$this->db->where('id', 1); 
+$this->db->where('name', 'safayat'); 
+
+//output: WHERE id = :id AND name = :name
+```
+
+<h5>2. Modified operator with Key and value method</h6>
+
+```
+$this->db->where('id >', 1); 
+$this->db->where('id !=', 3); 
+
+//output: WHERE id > :id AND id != :id
+```
+
+<p>Operator options are: =, !=, <>, <, >, <=, >= </p>
+  
+<p>You can also pass associative array to the function</p>
+    
+```
+$cond = [
+    'id' => 1,
+    'id !=' => 3
+  ];
+$this->db->where($cond); 
+
+//output: WHERE id = :id AND id != :id
+```
+  
+<h5>$this->db->or_where()</h6>
+
+<p>This function is same as the above one except multiple functions are join by OR. Here is an example:</p>
+
+```
+$this->db->where('id', 1);
+$this->db->or_where('id', 2);
+
+//output: WHERE id = :id OR id = :id
+```
+
+<h2>Ordering Result</h2>
+  
+<h5>$this->db->order()</h6>
+  
+<p>This function let you order your query result. Here is an example:</p>
+  
+```
+$this->db->order('id', 'desc');
+
+//output: ORDER BY id desc
+```
+  
+<p>You can also call this function multiple time to join them. Options for ordering are: asc, desc, random</p>
+  
+<h2>Limiting Result</h2>
+  
+<h5>$this->db->limit()</h6>
+  
+<p>This function let you limit number or result return by the query query. Here is an example:</p>
+  
+```
+$this->db->limit(5);
+
+//output: LIMIT 5
+```
+  
+<p>Second parameter lets you set a result offset.
+  
+```
+$this->db->limit(5, 10);
+
+//output: LIMIT 5,10
+```
+  
+<h2>Query Grouping</h2>
+  
+<p>Query grouping allows you to create groups of WHERE clauses by enclosing them in brackets. This will allow you to create queries with complex WHERE clauses. Here is an example:</p>
+  
+```
+$this->db->where('category', 'fruit');
+$this->db->group_start();
+$this->db->where('price <', 10);
+$this->db->or_where('quantity >', 20);
+$this->db->group_end();
+$this->db->where('value <', 10);
+  
+$this->db->execute('table');
+
+//output: WHERE category = :category AND (price < :price OR quantity > :quantity) AND value < :value
+```
+
+<h2 id="query-result">Query Result</h2>
+
+<p>The query is assigned to a variable $data which can be used to output results.</p>
+
+<h5>fetch()</h5>
+
+<p>This method return result as an array of object. normally you will use this to foreach loop. Here is an example</p>
+
+```
+foreach($data->fetch() as $result)
+{
+  echo $result->value1.'<br>';
+  echo $result->value2'<br>';
+  echo $result->value3'<br>';
+}
+```
+
+<h5>fetch_array()</h5>
+
+<p>This method return result as an array. Here is an example</p>
+
+```
+foreach($data->fetch_array() as $result)
+{
+  echo $result->value1.'<br>';
+  echo $result->value2'<br>';
+  echo $result->value3'<br>';
+}
+```
+
+<h5>count()</h5>
+
+<p>This method return the number of rows return by the query. Here is an example</p>
+
+```
+$data = $this->db->execute('table'); 
+echo "number of rows:". $data->count();
 ```
 
 <h3>Insert Data</h4>
 
 <h5>$this->db->insert()</h6>
 
-<p>Generate the insert query string and run based on the data you provided. Here is a example:</p>
+<p>Generate the insert query string and run based on the data you provided. Here is an example:</p>
 
 ```
 $data = [
@@ -105,7 +324,7 @@ $this->db->insert('table', $data);
 
 <h5>$this->db->update()</h6>
 
-<p>Generate the update query string and run based on the data you provided. Here is a example:</p>
+<p>Generate the update query string and run based on the data you provided. Here is an example:</p>
 
 ```
 $data = [
@@ -154,7 +373,7 @@ $this->db->buildUpdateQuery('table', $data);
 
 <h5>$this->db->delete()</h6>
 
-<p>Generate the delete query and run based on the data you provided. Here is a example:</p>
+<p>Generate the delete query and run based on the data you provided. Here is an example:</p>
 
 ```
 $this->db->delete('table', ['id' => 1]);
@@ -170,6 +389,8 @@ $this->db->where('id <', 5);
 $this->db->delete('table');
 ```
 
+<h5>$this->db->buildDeleteQuery()</h6>
+
 <p>Generate the delete query like $this->db->delete() but does not run the query but return the query as string:</p>
 
 ```
@@ -181,7 +402,7 @@ $this->db->buildDeleteQuery('table');
 
 <h3>Method Chaining</h4>
 
-<p>Method chaining allows you to simplify your syntax by connecting multiple functions. Here is example</p>
+<p>Method chaining allows you to simplify your syntax by connecting multiple functions. Here is an example</p>
 
 ```
 $query = $this->db->select('title')
