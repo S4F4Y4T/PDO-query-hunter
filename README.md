@@ -219,6 +219,18 @@ $this->db->execute('table');
 
 //output: WHERE category = :category AND (price < :price OR quantity > :quantity) AND value < :value
 ```
+  
+<h2>Query Group By</h2>
+
+<h5>$this->db->group_by();</h5>
+  
+<p>This function let you use group by in your query. Here is an example:</p>
+  
+```
+$this->db->group_by('id,name');
+
+//output: GROUP BY id,name
+```
 
 <h2 id="query-result">Query Result</h2>
 
@@ -259,9 +271,9 @@ $data = $this->db->execute('table');
 echo "number of rows:". $data->count();
 ```
 
-<h3>Insert Data</h4>
+<h2>Insert Data</h2>
 
-<h5>$this->db->insert()</h6>
+<h5>$this->db->insert()</h5>
 
 <p>Generate the insert query string and run based on the data you provided. Here is an example:</p>
 
@@ -319,10 +331,26 @@ $data = [
 $this->db->set($data);
 $this->db->insert('table', $data);
 ```
+  
+<h5>$this->db->insert_id()</h6>
 
-<h3>Update Data</h4>
+<p>This function return you the last inserted id. Here is an example</p>
 
-<h5>$this->db->update()</h6>
+```
+$this->db->set('key1', 'value1');
+$this->db->set('key2', 'value2');
+$this->db->set('key3', 'value3');
+
+$this->db->insert('table', $data);
+
+echo $this->db->insert_id();
+  
+//output: 1
+```
+
+<h2>Update Data</h2>
+
+<h5>$this->db->update()</h5>
 
 <p>Generate the update query string and run based on the data you provided. Here is an example:</p>
 
@@ -369,9 +397,9 @@ $this->db->buildUpdateQuery('table', $data);
 //output: UPDATE table SET key1=:key1,key2=:key2,key3=:key3 WHERE id = :id
 ```
 
-<h3>Delete Data</h4>
+<h2>Delete Data</h2>
 
-<h5>$this->db->delete()</h6>
+<h5>$this->db->delete()</h5>
 
 <p>Generate the delete query and run based on the data you provided. Here is an example:</p>
 
