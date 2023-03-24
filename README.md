@@ -245,7 +245,7 @@ $this->db->limit(5, 10);
 ```
 $this->db->like('name', 'safayat');
 
-//output: WHERE `name` LIKE '%safayat%' ESCAPE '!'
+//output: WHERE `name` LIKE '%safayat%'
 ```
 
 <p>You can use the third parameter to define where the wild card will be place. Options are: first,last,none,both<p>
@@ -256,10 +256,10 @@ $this->db->like('name', 'safayat', 'last');
 $this->db->like('name', 'safayat', 'none');
 $this->db->like('name', 'safayat', 'both');
 
-//output: WHERE `name` LIKE '%safayat' ESCAPE '!'
-//output: WHERE `name` LIKE 'safayat%' ESCAPE '!'
-//output: WHERE `name` LIKE 'safayat' ESCAPE '!'
-//output: WHERE `name` LIKE '%safayat%' ESCAPE '!'
+//output: WHERE `name` LIKE '%safayat'
+//output: WHERE `name` LIKE 'safayat%'
+//output: WHERE `name` LIKE 'safayat'
+//output: WHERE `name` LIKE '%safayat%'
 ```
 
 <p>You can also pass associative array. Here is an example</p>
@@ -274,7 +274,7 @@ $data = [
   ];
 $this->db->like($data);
 
-//output: WHERE `name` LIKE '%safayat%' ESCAPE '!'
+//output: WHERE `name` LIKE '%safayat%'
 ```
   
 <h3>Query Grouping</h3>
