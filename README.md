@@ -59,6 +59,8 @@ git clone https://github.com/S4F4Y4T/pdoQueryHunter
 
 <p>2. Open config.php and update database information</p>
 
+<p>3. Extend Mmodel class</p>
+
 <h2>Usage</h2>
 
 <h3 id="fetch-data">Fetch Data</h3>
