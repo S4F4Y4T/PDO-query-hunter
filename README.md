@@ -25,7 +25,6 @@
 <p id="description">This is a secure and robust PHP query builder that uses PDO to interact with the database. The query builder is designed to prevent SQL injection attacks and ensure that all user input is properly sanitized and validated. An easy-to-use interface that can be customized to suit your specific needs. Whether you're building a small application or a large-scale enterprise system this query builder provides the flexibility and scalability you need to manage your database queries efficiently. With its reliable performance and user-friendly interface this PHP query builder is the perfect tool for anyone who wants to build powerful and efficient applications using PDO. 
 
 Note: This query builder is inspired from codeigniter so the functions may be familiar to you if you have used codeigniter query builder before but under the hood they are different</p>
-
   
 <h2>Features</h2>
 
