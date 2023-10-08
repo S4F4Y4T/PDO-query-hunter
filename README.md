@@ -1,4 +1,4 @@
-<h1 align="center" id="title">pdoQueryHunter</h1>
+<h1 align="center" id="title">pdoQueryBuilder</h1>
 
 <!-- TABLE OF CONTENTS -->
 <details>
