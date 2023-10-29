@@ -1,11 +1,18 @@
 <?php
+
+namespace App\Core;
+
+use PDO;
+use PDOException;
+use ReflectionProperty;
+
 class Database extends PDO
 {
-	private $select = ['*'];
-	private $table = [];
-	private $condition = [];
+    private $select = ['*'];
+    private $table = [];
+    private $condition = [];
     private $cond_operators = ['=', '!=', '<>', '<', '>', '<=', '>='];
-	private $order = [];
+    private $order = [];
     private $order_mode = ['asc', 'desc', 'random'];
     private $join_type = ['inner', 'outer', 'left', 'right', 'cross'];
     private $wildcard_position = ['first', 'last', 'none', 'both'];
@@ -25,47 +32,47 @@ class Database extends PDO
     private $set = [];
 
     public function __construct($dsn, $user, $pass)
-	{
+    {
         try {
             parent::__construct($dsn, $user, $pass);
             $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             $this->display_error("Connection failed: " . $e->getMessage());
         }
-	}
+    }
 
-	private function display_error($error = "An error occurred")
-	{
-		throw new \Exception($error);
+    private function display_error($error = "An error occurred")
+    {
+        throw new \Exception($error);
 //		echo "<h2><center>DB Error: ".$error."</center></h2>";
-		exit();
-	}
+        exit();
+    }
 
-	public function select($columns = ''): Database
+    public function select($columns = ''): Database
     {
         $this->select = [];
-		$columns = empty($columns) ? '*' : $columns;
+        $columns = empty($columns) ? '*' : $columns;
 
-		$columns = explode(',', $columns);
+        $columns = explode(',', $columns);
 
-		foreach ($columns as $column) {
-			$this->select[] = $column;
-		}
+        foreach ($columns as $column) {
+            $this->select[] = $column;
+        }
 
-		return $this;
-	}
+        return $this;
+    }
 
-	public function table($table = ''): Database
+    public function table($table = ''): Database
     {
-		if(empty($table)){
-			$this->display_error('Table cannot be empty');
-		}
+        if (empty($table)) {
+            $this->display_error('Table cannot be empty');
+        }
 
         $this->table = [];
-		$this->table[] = trim($table);
+        $this->table[] = trim($table);
 
-		return $this;
-	}
+        return $this;
+    }
 
     public function group_start(): Database
     {
@@ -84,36 +91,36 @@ class Database extends PDO
      */
     public function where($cond, $value = ''): Database
     {
-		if(!empty($cond)){
-			if(is_array($cond)){
+        if (!empty($cond)) {
+            if (is_array($cond)) {
 
-                foreach($cond as $key => $val){
+                foreach ($cond as $key => $val) {
                     $this->whereConditionBuild($key, $val, null, null, null);
                 }
 
-			}else{
+            } else {
 
                 $this->whereConditionBuild($cond, $value, null, null, null);
 
             }
-		}
+        }
 
-		return $this;
-	}
+        return $this;
+    }
 
     /**
      * @throws Exception
      */
     public function or_where($cond, $value = ''): Database
     {
-        if(!empty($cond)){
-            if(is_array($cond)){
+        if (!empty($cond)) {
+            if (is_array($cond)) {
 
-                foreach($cond as $key => $val){
+                foreach ($cond as $key => $val) {
                     $this->whereConditionBuild($key, $val, 'OR', null, null, null);
                 }
 
-            }else{
+            } else {
 
                 $this->whereConditionBuild($cond, $value, 'OR', null, null, null);
 
@@ -128,14 +135,14 @@ class Database extends PDO
      */
     public function like($cond, $value = '', $position = "both"): Database
     {
-        if(!empty($cond)){
-            if(is_array($cond)){
+        if (!empty($cond)) {
+            if (is_array($cond)) {
 
-                foreach($cond as $key => $val){
+                foreach ($cond as $key => $val) {
                     $this->whereConditionBuild($key, $val, 'AND', "LIKE", 'like', $position);
                 }
 
-            }else{
+            } else {
 
                 $this->whereConditionBuild($cond, $value, 'AND', "LIKE", 'like', $position);
 
@@ -150,14 +157,14 @@ class Database extends PDO
      */
     public function or_like($cond, $value = '', $position = "both"): Database
     {
-        if(!empty($cond)){
-            if(is_array($cond)){
+        if (!empty($cond)) {
+            if (is_array($cond)) {
 
-                foreach($cond as $key => $val){
+                foreach ($cond as $key => $val) {
                     $this->whereConditionBuild($key, $val, 'OR', "LIKE", 'like', $position);
                 }
 
-            }else{
+            } else {
 
                 $this->whereConditionBuild($cond, $value, 'OR', "LIKE", 'like', $position);
 
@@ -184,7 +191,7 @@ class Database extends PDO
         $this->condition[] = [
             'position' => $position,
             'query' => $query,
-            'type' => $type,
+            'type' => $type ?? "AND",
             'key' => $cond[0],
             'operator' => $operator,
             'value' => $value
@@ -196,7 +203,7 @@ class Database extends PDO
      */
     public function order(string $column = 'id', string $mode = ''): Database
     {
-        if(!empty($column)){
+        if (!empty($column)) {
 
             $mode = empty($mode) ? 'desc' : $mode;
 
@@ -210,10 +217,10 @@ class Database extends PDO
 
     public function limit($start = '', $limit = ''): Database
     {
-        if(!empty($start)){
-            if(empty($limit)){
+        if (!empty($start)) {
+            if (empty($limit)) {
                 $this->limit['limit'] = $start;
-            }else{
+            } else {
                 $this->limit['start'] = $start;
                 $this->limit['limit'] = $limit;
             }
@@ -227,8 +234,7 @@ class Database extends PDO
      */
     public function join($table = '', $cond = '', $type = ''): Database
     {
-        if(!empty($table))
-        {
+        if (!empty($table)) {
             $type = empty($type) ? (empty($cond) ? 'cross' : 'inner') : $type;
             $type = (in_array($type, $this->join_type)) ? $type : $this->display_error("Invalid JOIN Type");
 
@@ -238,7 +244,7 @@ class Database extends PDO
                 'type' => $type
             ];
 
-        }else{
+        } else {
             $this->display_error("Table cannot be empty");
         }
 
@@ -265,22 +271,23 @@ class Database extends PDO
      */
     public function set($cond = '', $value = ''): Database
     {
-        if(!empty($cond)){
+        if (!empty($cond)) {
 
-            if(is_array($cond)){
-                foreach($cond as $key => $val){
+            if (is_array($cond)) {
+                foreach ($cond as $key => $val) {
                     $this->setConditionBuild($key, $val);
                 }
-            }else{
+            } else {
                 $this->setConditionBuild($cond, $value);
             }
 
-        }else{
+        } else {
             $this->display_error("Set condition is required");
         }
 
         return $this;
     }
+
     private function setConditionBuild($key = '', $value = '')
     {
         $this->set[$key] = $value;
@@ -290,7 +297,7 @@ class Database extends PDO
     {
         $sql = '';
 
-        if(!empty($this->select)){
+        if (!empty($this->select)) {
             $sql .= 'SELECT ';
 
             $sql .= implode(', ', $this->select);
@@ -298,11 +305,12 @@ class Database extends PDO
 
         return $sql;
     }
+
     private function buildFromQuery(): string
     {
         $sql = '';
 
-        if(!empty($this->table)){
+        if (!empty($this->table)) {
             $sql .= ' FROM ';
 
             $sql .= implode(', ', $this->table);
@@ -310,15 +318,16 @@ class Database extends PDO
 
         return $sql;
     }
+
     private function buildJoinQuery(): string
     {
         $sql = '';
 
-        if(!empty($this->join)){
+        if (!empty($this->join)) {
 
-            foreach($this->join as $join){
+            foreach ($this->join as $join) {
 
-                switch ($join['type']){
+                switch ($join['type']) {
                     case 'left':
                         $sql .= " LEFT JOIN ";
                         break;
@@ -338,7 +347,7 @@ class Database extends PDO
 
                 $sql .= $join['table'];
 
-                if(!empty($join['condition'])){
+                if (!empty($join['condition'])) {
                     $sql .= ' ON ';
 
                     $sql .= $join['condition'];
@@ -348,43 +357,45 @@ class Database extends PDO
 
         return $sql;
     }
+
     private function buildWhereQuery(): string
     {
         $sql = '';
 
-        if(!empty($this->condition)){
+        if (!empty($this->condition)) {
             $sql .= ' WHERE ';
 
-            foreach($this->condition as $key => $condition){
+            foreach ($this->condition as $key => $condition) {
 
                 $group_start = in_array($key, $this->group_start) ? '(' : '';
                 $group_end = in_array($key, $this->group_end) ? ')' : '';
 
-                $sql .= (($key > 0) ? ' '.$condition['type'].' ' : '')
-                    .$group_start.$condition['key']. ' '
-                    .(!empty($condition['operator']) ? $condition['operator'] : "=")
-                    .' :'.$condition['key']. $group_end;
+                $sql .= (($key > 0) ? ' ' . $condition['type'] . ' ' : '')
+                    . $group_start . $condition['key'] . ' '
+                    . (!empty($condition['operator']) ? $condition['operator'] : "=")
+                    . ' :' . $condition['key'] . $group_end;
 
             }
         }
 
         return $sql;
     }
+
     private function buildOrderByQuery(): string
     {
         $sql = '';
 
-        if(!empty($this->order)){
+        if (!empty($this->order)) {
             $sql .= ' ORDER BY ';
 
-            foreach($this->order as $key => $value){
+            foreach ($this->order as $key => $value) {
                 $keys = array_keys($this->order);
 
-                if($value === 'random'){
-                    $sql .= ' RAND('.$key.') '
+                if ($value === 'random') {
+                    $sql .= ' RAND(' . $key . ') '
                         . (end($keys) === $key ? '' : ', ');
-                }else{
-                    $sql .= $key.' '.$value
+                } else {
+                    $sql .= $key . ' ' . $value
                         . (end($keys) === $key ? '' : ', ');
                 }
 
@@ -393,11 +404,12 @@ class Database extends PDO
 
         return $sql;
     }
+
     private function buildGroupByQuery(): string
     {
         $sql = '';
 
-        if(!empty($this->group_by)){
+        if (!empty($this->group_by)) {
             $sql .= 'GROUP BY ';
 
             $sql .= implode(', ', $this->group_by);
@@ -405,17 +417,18 @@ class Database extends PDO
 
         return $sql;
     }
+
     private function buildLimitQuery(): string
     {
         $sql = '';
 
-        if(!empty($this->limit)){
+        if (!empty($this->limit)) {
             $sql .= ' LIMIT ';
 
-            if(empty($this->limit['start'])){
+            if (empty($this->limit['start'])) {
                 $sql .= $this->limit['limit'];
-            }else{
-                $sql .= $this->limit['start'].','.$this->limit['limit'];
+            } else {
+                $sql .= $this->limit['start'] . ',' . $this->limit['limit'];
             }
         }
 
@@ -424,15 +437,15 @@ class Database extends PDO
 
     public function buildFetchQuery($table = '', $start = '', $limit = ''): string
     {
-        if(!empty($table)){
+        if (!empty($table)) {
             $this->table = [];
             $this->table[] = trim($table);
         }
 
-        if(!empty($start)){
-            if(empty($limit)){
+        if (!empty($start)) {
+            if (empty($limit)) {
                 $this->limit['limit'] = $start;
-            }else{
+            } else {
                 $this->limit['start'] = $start;
                 $this->limit['limit'] = $limit;
             }
@@ -456,18 +469,19 @@ class Database extends PDO
 
         return $sql;
     }
+
     public function buildInsertQuery($table = '', $data = []): string
     {
-        if(is_array($data)){
-            foreach($data as $key => $val){
+        if (is_array($data)) {
+            foreach ($data as $key => $val) {
                 $this->setConditionBuild($key, $val);
             }
         }
 
-        $sql   = 'INSERT INTO '.$table.'('
-            .(!empty($this->set) ? implode(",",array_keys($this->set)) : '').
+        $sql = 'INSERT INTO ' . $table . '('
+            . (!empty($this->set) ? implode(",", array_keys($this->set)) : '') .
             ') VALUES('
-            .(!empty($this->set) ? ":".implode(", :",array_keys($this->set)): '').
+            . (!empty($this->set) ? ":" . implode(", :", array_keys($this->set)) : '') .
             ')';
 
         return $sql;
@@ -478,26 +492,26 @@ class Database extends PDO
      */
     public function buildUpdateQuery($table = '', $data = [], $cond = []): string
     {
-        if(is_array($data)){
-            foreach($data as $key => $val){
+        if (is_array($data)) {
+            foreach ($data as $key => $val) {
                 $this->setConditionBuild($key, $val);
             }
         }
 
-        if(is_array($cond)){
-            foreach($cond as $key => $val){
+        if (is_array($cond)) {
+            foreach ($cond as $key => $val) {
                 $this->whereConditionBuild($key, $val);
             }
         }
 
         $set = null;
-        $sql = "UPDATE ".$table;
+        $sql = "UPDATE " . $table;
 
-        foreach($this->set as $key => $val){
+        foreach ($this->set as $key => $val) {
             $set .= "$key=:$key,";
         }
 
-        $sql .= " SET ".rtrim($set,",");
+        $sql .= " SET " . rtrim($set, ",");
 
         $sql .= $this->buildWhereQuery();
 
@@ -509,23 +523,23 @@ class Database extends PDO
      */
     public function buildDeleteQuery($table = '', $cond = []): string
     {
-        if(!empty($cond)){
-            if(is_array($cond)){
-                foreach($cond as $key => $val){
+        if (!empty($cond)) {
+            if (is_array($cond)) {
+                foreach ($cond as $key => $val) {
                     $this->whereConditionBuild($key, $val);
                 }
             }
         }
 
-        $sql = "DELETE FROM ".$table;
+        $sql = "DELETE FROM " . $table;
 
         $sql .= $this->buildWhereQuery();
 
         return $sql;
     }
 
-	private function resetQuery()
-	{
+    private function resetQuery()
+    {
         $this->select = ['*'];
         $this->table = [];
         $this->condition = [];
@@ -536,54 +550,54 @@ class Database extends PDO
         $this->group_end = [];
         $this->limit = [];
         $this->set = [];
-	}
+    }
 
 
-	public function execute($table = '', $start = '', $limit = '')
+    public function execute($table = '', $start = '', $limit = '')
     {
-        if(!empty($table)){
+        if (!empty($table)) {
             $this->table = [];
             $this->table[] = trim($table);
         }
 
-        if(!empty($start)){
-            if(empty($limit)){
+        if (!empty($start)) {
+            if (empty($limit)) {
                 $this->limit['limit'] = $start;
-            }else{
+            } else {
                 $this->limit['start'] = $start;
                 $this->limit['limit'] = $limit;
             }
         }
 
-		try{
-			$stmt = $this->prepare($this->buildFetchQuery());
+        try {
+            $stmt = $this->prepare($this->buildFetchQuery());
 
-			if(!empty($this->condition)){
-				foreach($this->condition as $condition){
+            if (!empty($this->condition)) {
+                foreach ($this->condition as $condition) {
 
                     $value = $condition['value'];
 
-                    if(!empty($condition['query']) && $condition['query'] === "like"){
+                    if (!empty($condition['query']) && $condition['query'] === "like") {
                         $position = (in_array($condition['position'], $this->wildcard_position) ?
                             $condition['position'] : $this->display_error("Invalid wildcard position"));
 
-                        switch ($position){
+                        switch ($position) {
                             case 'first':
-                                $value = '%'.$value;
+                                $value = '%' . $value;
                                 break;
                             case 'last':
-                                $value = $value.'%';
+                                $value = $value . '%';
                                 break;
                             case 'none':
                                 break;
                             default:
-                                $value = '%'.$value.'%';
+                                $value = '%' . $value . '%';
                                 break;
                         }
                     }
-                    $stmt->bindValue(':'.$condition['key'], $value);
-				}
-			}
+                    $stmt->bindValue(':' . $condition['key'], $value);
+                }
+            }
 
             $this->resetQuery();
             $stmt->execute();
@@ -595,37 +609,37 @@ class Database extends PDO
             $reflector->setAccessible(true);
 
             $reflector->setValue($db_result, [
-                'object' => (object) $result,
+                'object' => (object)$result,
                 'array' => $result,
                 'count' => $stmt->rowCount()
             ]);
 
             return $db_result;
 
-		} catch (Exception $e) {
+        } catch (Exception $e) {
             $this->display_error("Query error: " . $e->getMessage());
         }
 
         return $this;
-	}
+    }
 
     /**
      * @throws Exception
      */
     public function insert($table = '', $data = []): bool
     {
-        $table = !empty($table) ?  $table : $this->display_error("Table cannot be empty");
-        empty($this->set) && empty($data) ?  $this->display_error("Set cannot be empty") : '' ;
+        $table = !empty($table) ? $table : $this->display_error("Table cannot be empty");
+        empty($this->set) && empty($data) ? $this->display_error("Set cannot be empty") : '';
 
-        if(is_array($data)){
-            foreach($data as $key => $val){
+        if (is_array($data)) {
+            foreach ($data as $key => $val) {
                 $this->setConditionBuild($key, $val);
             }
         }
 
         $stmt = $this->prepare($this->buildInsertQuery($table));
 
-        foreach($this->set as $key => $val){
+        foreach ($this->set as $key => $val) {
             $stmt->bindValue(":$key", $val);
         }
 
@@ -637,7 +651,7 @@ class Database extends PDO
     {
         $last_id = $this->lastInsertId();
 
-        if(!empty($last_id) && $last_id > 0){
+        if (!empty($last_id) && $last_id > 0) {
             return $last_id;
         }
 
@@ -649,32 +663,32 @@ class Database extends PDO
      */
     public function update($table = '', $data = [], $cond = []): bool
     {
-        $table = !empty($table) ?  $table : $this->display_error("Table cannot be empty");
-        empty($this->set) ?  $this->display_error("Set cannot be empty") : '' ;
+        $table = !empty($table) ? $table : $this->display_error("Table cannot be empty");
+        empty($this->set) ? $this->display_error("Set cannot be empty") : '';
 
-        if(is_array($data)){
-            foreach($data as $key => $val){
+        if (is_array($data)) {
+            foreach ($data as $key => $val) {
                 $this->setConditionBuild($key, $val);
             }
         }
 
-        if(is_array($cond)){
-            foreach($cond as $key => $val){
+        if (is_array($cond)) {
+            foreach ($cond as $key => $val) {
                 $this->whereConditionBuild($key, $val);
             }
         }
 
         $stmt = $this->prepare($this->buildUpdateQuery($table));
 
-        if(!empty($this->condition)){
-            foreach($this->condition as $condition){
-                $stmt->bindValue(':'.$condition['key'], $condition['value']);
+        if (!empty($this->condition)) {
+            foreach ($this->condition as $condition) {
+                $stmt->bindValue(':' . $condition['key'], $condition['value']);
             }
         }
 
-        if(!empty($this->set)){
-            foreach($this->set as $key => $value){
-                $stmt->bindValue(':'.$key, $value);
+        if (!empty($this->set)) {
+            foreach ($this->set as $key => $value) {
+                $stmt->bindValue(':' . $key, $value);
             }
         }
 
@@ -687,11 +701,11 @@ class Database extends PDO
      */
     public function delete($table = '', $cond = []): bool
     {
-        $table = !empty($table) ?  $table : $this->display_error("Table cannot be empty");
+        $table = !empty($table) ? $table : $this->display_error("Table cannot be empty");
 
-        if(!empty($cond)){
-            if(is_array($cond)){
-                foreach($cond as $key => $val){
+        if (!empty($cond)) {
+            if (is_array($cond)) {
+                foreach ($cond as $key => $val) {
                     $this->whereConditionBuild($key, $val);
                 }
             }
@@ -699,9 +713,9 @@ class Database extends PDO
 
         $stmt = $this->prepare($this->buildDeleteQuery($table));
 
-        if(!empty($this->condition)){
-            foreach($this->condition as $condition){
-                $stmt->bindValue(':'.$condition['key'], $condition['value']);
+        if (!empty($this->condition)) {
+            foreach ($this->condition as $condition) {
+                $stmt->bindValue(':' . $condition['key'], $condition['value']);
             }
         }
 
@@ -717,7 +731,8 @@ class Database extends PDO
     }
 }
 
-class DB_Result{
+class DB_Result
+{
 
     protected $result = [];
 

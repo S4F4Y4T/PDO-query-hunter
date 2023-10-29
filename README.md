@@ -56,9 +56,9 @@ Upcoming feature and function still about to come:
 git clone https://github.com/S4F4Y4T/pdoQueryHunter
 ```
 
-<p>2. Open config.php and update database information</p>
+<p>2. Open app/Congig/Config.php and update database information</p>
 
-<p>3. Extend Mmodel class</p>
+<p>3. Create model inside app/Model and extend Main_model</p>
 
 <h2>Usage</h2>
 
@@ -66,7 +66,7 @@ git clone https://github.com/S4F4Y4T/pdoQueryHunter
 
 <h5>$this->db->execute()</h5>
 
-<p>Call this function to retrive all the records from table</p>
+<p>Call this function to retrieve all the records from table</p>
 
 ```
 $data = $this->db->execute('table');
